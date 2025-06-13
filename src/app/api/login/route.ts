@@ -4,10 +4,15 @@ import bcrypt from 'bcryptjs'
 export async function POST(req: Request) {
   const { senha } = await req.json()
 
-  const match = await bcrypt.compare(senha, 'senha123') // ou use process.env.HASHED_PASSWORD + compareSync
+  const hashed = process.env.HASHED_PASSWORD
+  if (!hashed) {
+    return NextResponse.json({ success: false, error: 'HASHED_PASSWORD not set' }, { status: 500 })
+  }
+
+  const match = await bcrypt.compare(senha, hashed)
   if (match) {
     const response = NextResponse.json({ success: true })
-    response.cookies.set('auth-token', process.env.HASHED_PASSWORD!, {
+    response.cookies.set('auth-token', hashed, {
       httpOnly: true,
       path: '/',
     })
