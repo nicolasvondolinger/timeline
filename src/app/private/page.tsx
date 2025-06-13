@@ -50,28 +50,13 @@ export default function ProtectedPage() {
 
   return (
     <main className="min-h-screen bg-[#0a0f2c] text-white flex items-center justify-center flex-col p-8">
-      <div className="bg-black/30 rounded-2xl p-6 backdrop-blur-md shadow-lg">
-        <div className="grid grid-cols-4 gap-4 text-center text-2xl sm:text-4xl font-mono">
-          {[
-            { label: 'Anos', value: diff.y },
-            { label: 'Meses', value: diff.mo },
-            { label: 'Semanas', value: diff.w },
-            { label: 'Dias', value: diff.d },
-            { label: 'Horas', value: diff.h },
-            { label: 'Minutos', value: diff.m },
-            { label: 'Segundos', value: diff.s },
-          ].map((item, idx) => (
-            <div key={idx} className="flex flex-col items-center flip-container">
-              <div className="flip-card">
-                <span className="flip-digit">{item.value.toString().padStart(2, '0')}</span>
-              </div>
-              <span className="text-sm mt-2 text-white/70">{item.label}</span>
-            </div>
-          ))}
-        </div>
+      <div className="bg-black/40 rounded-2xl px-8 py-6 shadow-md backdrop-blur-md">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-mono whitespace-nowrap">
+          {diff.y}a {diff.mo}m {diff.w}s {diff.d}d {diff.h}h {diff.m}min {diff.s}s
+        </h1>
       </div>
 
-      <div className="mt-8 w-full max-w-4xl">
+      <div className="mt-12 w-full max-w-4xl">
         <UploadTimeline />
       </div>
     </main>
