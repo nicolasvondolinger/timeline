@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import UploadTimeline from '@/components/UploadTimeline'
 
 const START_DATE = new Date('2022-05-01T21:50:00')
@@ -15,23 +15,76 @@ type TimeDiff = {
   s: number
 }
 
-// Componente para cada dígito do flip counter
+// Componente para cada dígito do flip counter com animação
 function FlipDigit({ value, label }: { value: number; label: string }) {
+  const [currentValue, setCurrentValue] = useState(value)
+  const [previousValue, setPreviousValue] = useState(value)
+  const [isFlipping, setIsFlipping] = useState(false)
+  const topRef = useRef<HTMLDivElement>(null)
+  const bottomRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (value !== currentValue) {
+      setPreviousValue(currentValue)
+      setCurrentValue(value)
+      setIsFlipping(true)
+      
+      // Reset animation after it completes
+      const timeout = setTimeout(() => {
+        setIsFlipping(false)
+      }, 600)
+      
+      return () => clearTimeout(timeout)
+    }
+  }, [value, currentValue])
+
   return (
     <div className="flex flex-col items-center mx-1">
-      <div className="relative w-16 h-20">
-        {/* Parte superior do dígito */}
-        <div className="absolute top-0 w-full h-10 bg-gray-900 rounded-t-lg overflow-hidden flex items-center justify-center">
-          <span className="text-2xl font-bold text-white">{value.toString().padStart(2, '0')}</span>
+      <div className="relative w-16 h-20 perspective-500">
+        {/* Parte superior do dígito (valor atual) */}
+        <div 
+          ref={topRef}
+          className={`absolute top-0 w-full h-10 bg-gray-900 rounded-t-lg overflow-hidden flex items-center justify-center transition-transform duration-300 origin-bottom ${
+            isFlipping ? 'rotateX-90' : ''
+          }`}
+          style={{
+            transform: isFlipping ? 'rotateX(90deg)' : 'rotateX(0deg)',
+            transformStyle: 'preserve-3d',
+            backfaceVisibility: 'hidden',
+            zIndex: 2
+          }}
+        >
+          <span className="text-2xl font-bold text-white">{currentValue.toString().padStart(2, '0')}</span>
         </div>
-        {/* Parte inferior do dígito */}
-        <div className="absolute bottom-0 w-full h-10 bg-gray-800 rounded-b-lg overflow-hidden flex items-center justify-center">
-          <span className="text-2xl font-bold text-white">{value.toString().padStart(2, '0')}</span>
+        
+        {/* Parte superior do dígito (valor anterior - saindo) */}
+        <div 
+          className={`absolute top-0 w-full h-10 bg-gray-900 rounded-t-lg overflow-hidden flex items-center justify-center transition-transform duration-300 origin-bottom ${
+            isFlipping ? '' : 'rotateX-90'
+          }`}
+          style={{
+            transform: isFlipping ? 'rotateX(0deg)' : 'rotateX(90deg)',
+            transformStyle: 'preserve-3d',
+            backfaceVisibility: 'hidden',
+            zIndex: isFlipping ? 1 : 0
+          }}
+        >
+          <span className="text-2xl font-bold text-white">{previousValue.toString().padStart(2, '0')}</span>
         </div>
+        
+        {/* Parte inferior do dígito (valor atual) */}
+        <div 
+          ref={bottomRef}
+          className="absolute bottom-0 w-full h-10 bg-gray-800 rounded-b-lg overflow-hidden flex items-center justify-center"
+          style={{
+            zIndex: 2
+          }}
+        >
+          <span className="text-2xl font-bold text-white">{currentValue.toString().padStart(2, '0')}</span>
+        </div>
+        
         {/* Linha divisória */}
         <div className="absolute top-1/2 w-full h-1 bg-black z-10"></div>
-        {/* Efeito de dobra (parte que "vira") */}
-        <div className="absolute top-0 w-full h-5 bg-gray-700 opacity-30 rounded-t-lg"></div>
       </div>
       <span className="text-xs mt-2 text-gray-300">{label}</span>
     </div>
@@ -72,25 +125,50 @@ export default function ProtectedPage() {
   }, [])
 
   return (
-    <main className="min-h-screen bg-blue-950 text-white p-8">
+    <main className="min-h-screen bg-gradient-to-br from-blue-950 to-blue-900 text-white p-8">
       <div className="max-w-4xl mx-auto">
         {/* Container do contador com fundo preto translúcido e bordas arredondadas */}
-        <div className="bg-black bg-opacity-50 rounded-xl p-6 mb-8 backdrop-blur-sm">
-          <h1 className="text-2xl text-center mb-6 text-gray-300">Tempo desde o início</h1>
+        <div className="bg-black bg-opacity-50 rounded-xl p-6 mb-8 backdrop-blur-sm border border-blue-400 border-opacity-20 shadow-lg">
+          <h1 className="text-2xl text-center mb-6 text-blue-200 font-light tracking-wider">
+            TEMPO DECORRIDO
+          </h1>
           
-          <div className="flex justify-center items-center flex-wrap gap-4">
-            <FlipDigit value={diff.y} label="anos" />
-            <FlipDigit value={diff.mo} label="meses" />
-            <FlipDigit value={diff.w} label="semanas" />
-            <FlipDigit value={diff.d} label="dias" />
-            <FlipDigit value={diff.h} label="horas" />
-            <FlipDigit value={diff.m} label="minutos" />
-            <FlipDigit value={diff.s} label="segundos" />
+          <div className="flex justify-center items-center flex-wrap gap-2 md:gap-4">
+            <FlipDigit value={diff.y} label="ANOS" />
+            <FlipDigit value={diff.mo} label="MESES" />
+            <FlipDigit value={diff.w} label="SEMANAS" />
+            <FlipDigit value={diff.d} label="DIAS" />
+            <FlipDigit value={diff.h} label="HORAS" />
+            <FlipDigit value={diff.m} label="MINUTOS" />
+            <FlipDigit value={diff.s} label="SEGUNDOS" />
           </div>
         </div>
         
         <UploadTimeline />
       </div>
+
+      {/* Adicionando estilos de animação */}
+      <style jsx global>{`
+        @keyframes flip {
+          0% {
+            transform: rotateX(0deg);
+          }
+          50% {
+            transform: rotateX(90deg);
+          }
+          100% {
+            transform: rotateX(0deg);
+          }
+        }
+        
+        .perspective-500 {
+          perspective: 500px;
+        }
+        
+        .rotateX-90 {
+          transform: rotateX(90deg);
+        }
+      `}</style>
     </main>
   )
 }
