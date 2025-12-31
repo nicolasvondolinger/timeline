@@ -30,7 +30,7 @@ export default function TimeCounter() {
       const seconds = now.getSeconds() - startDate.getSeconds()
 
       setTime(
-        `${years} Anos, ${months} Meses, ${days} Dias, ${hours} Horas, ${minutes} Minutos, ${seconds} Segundos`
+        `${years} anos, ${months} meses, ${days} dias, ${hours} horas, ${minutes} minutos, ${seconds} segundos`
       )
     }, 1000)
 
