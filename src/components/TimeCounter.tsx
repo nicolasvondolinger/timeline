@@ -9,23 +9,34 @@ export default function TimeCounter() {
 
     const timer = setInterval(() => {
       const now = new Date()
-      const diff = now.getTime() - startDate.getTime()
 
-      // Cálculos matemáticos de tempo
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-      const years = Math.floor(days / 365)
-      const months = Math.floor((days % 365) / 30)
-      const remainingDays = days % 30
-      
-      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
-      const seconds = Math.floor((diff % (1000 * 60)) / 1000)
+      let years = now.getFullYear() - startDate.getFullYear()
+      let months = now.getMonth() - startDate.getMonth()
+      let days = now.getDate() - startDate.getDate()
 
-      setTime(`${years} Anos, ${months} Meses, ${remainingDays} Dias, ${hours} Horas, ${minutes} Minutos e ${seconds} Segundos`)
+      if (days < 0) {
+        months--
+        const lastMonth = new Date(now.getFullYear(), now.getMonth(), 0)
+        days += lastMonth.getDate()
+      }
+
+      if (months < 0) {
+        years--
+        months += 12
+      }
+
+      const hours = now.getHours() - startDate.getHours()
+      const minutes = now.getMinutes() - startDate.getMinutes()
+      const seconds = now.getSeconds() - startDate.getSeconds()
+
+      setTime(
+        `${years} Anos, ${months} Meses, ${days} Dias, ${hours} Horas, ${minutes} Minutos, ${seconds} Segundos`
+      )
     }, 1000)
 
     return () => clearInterval(timer)
   }, [])
+
 
   // Evita erro de hidratação mostrando vazio no primeiro render
   if (!time) return <div className="h-8"></div>
